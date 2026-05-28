@@ -1,2 +1,1 @@
-# kurvo
 # creative-lab
