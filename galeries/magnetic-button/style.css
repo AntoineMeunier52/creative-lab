@@ -1,5 +1,5 @@
 :root {
-  --color-bg: #0e0e0e;
+  --color-bg: #ffffff;
   --color-text: #f1f1f1;
   --color-accent: #ff4d4d;
 }
@@ -19,14 +19,13 @@ body {
 }
 
 .button-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-}
+  position: relative;
 
-.button-trigger {
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 100vh;
 }
 
 .button {
@@ -44,8 +43,24 @@ body {
   transition: background 0.3s ease;
 }
 
+.button-shadow {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  /* décalage d'origine, sur `translate` pour laisser `transform` libre au JS */
+  translate: 8px 10px;
+  background: rgb(168, 167, 167);
+  border: none;
+  border-radius: 999px;
+  height: 2.5rem;
+  width: 9.3rem;
+  will-change: transform;
+  filter: blur(8px);
+}
+
 .button.active,
 body.active .button {
   background: #fff;
   color: #000;
+  border: 1px solid black;
 }
