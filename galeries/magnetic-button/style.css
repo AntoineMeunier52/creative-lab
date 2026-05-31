@@ -1,0 +1,51 @@
+:root {
+  --color-bg: #0e0e0e;
+  --color-text: #f1f1f1;
+  --color-accent: #ff4d4d;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: system-ui, sans-serif;
+}
+
+.button-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.button-trigger {
+  display: inline-block;
+}
+
+.button {
+  background: var(--color-accent);
+  border: none;
+  color: var(--color-text);
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  cursor: pointer;
+  will-change: transform;
+  transition: background 0.3s ease;
+}
+
+.button.active,
+body.active .button {
+  background: #fff;
+  color: #000;
+}

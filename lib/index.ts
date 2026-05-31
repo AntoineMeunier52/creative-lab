@@ -1,13 +1,5 @@
-import EventEmitter from "./eventEmitter";
-import globalTicker from "./ticker";
-import { map, lerp, getMousePos, calcWinSize, distance } from "./utils";
-
-export default {
-  EventEmitter,
-  globalTicker,
-  map,
-  lerp,
-  getMousePos,
-  calcWinSize,
-  distance,
-};
+export { default as EventEmitter } from "./eventEmitter";
+export { default as globalTicker } from "./ticker";
+export { default as Tween } from "./tween";
+export type { EasingFunction } from "./type";
+export { map, lerp, getMousePos, calcWinSize, distance } from "./utils";

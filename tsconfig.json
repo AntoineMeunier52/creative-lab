@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    /* Language & environment */
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+
+    /* Path aliases (kept in sync with vite.config.ts) */
+    "paths": {
+      "@lib": ["./lib/index.ts"],
+      "@lib/*": ["./lib/*"]
+    },
+
+    /* Type-check only — emit is handled by tsconfig.build.json / Vite */
+    "noEmit": true,
+
+    /* Interop */
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+
+    /* Type checking */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "skipLibCheck": true
+  },
+  "include": ["lib", "galeries"],
+  "exclude": ["node_modules", "dist"]
+}

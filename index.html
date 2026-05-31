@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Creative Lab — Galeries</title>
+    <style>
+      :root {
+        --color-bg: #0e0e0e;
+        --color-text: #f1f1f1;
+        --color-accent: #ff4d4d;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--color-bg);
+        color: var(--color-text);
+        font-family: system-ui, sans-serif;
+      }
+      main {
+        width: min(640px, 90vw);
+      }
+      h1 {
+        font-size: 1.5rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      ul {
+        list-style: none;
+        padding: 0;
+        display: grid;
+        gap: 0.5rem;
+      }
+      a {
+        display: block;
+        padding: 1rem 1.25rem;
+        border: 1px solid #2a2a2a;
+        border-radius: 12px;
+        color: var(--color-text);
+        text-decoration: none;
+        transition: border-color 0.2s ease, color 0.2s ease;
+      }
+      a:hover {
+        border-color: var(--color-accent);
+        color: var(--color-accent);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Creative Lab</h1>
+      <ul>
+        <li><a href="/galeries/magnetic-button/">Magnetic Button</a></li>
+      </ul>
+    </main>
+  </body>
+</html>

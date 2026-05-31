@@ -11,11 +11,8 @@ const getMousePos = (e: MouseEvent) => {
   };
 };
 
-const distance = (x1: number, x2: number, y1: number, y2: number) => {
-  let a = x1 - x2;
-  let b = y1 - y2;
-
-  return Math.hypot(a, b);
+const distance = (x1: number, y1: number, x2: number, y2: number) => {
+  return Math.hypot(x2 - x1, y2 - y1);
 };
 
 const calcWinSize = () => {
