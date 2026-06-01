@@ -1,0 +1,38 @@
+body {
+  cursor: none;
+}
+
+.cursor-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.cursor-quad {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.cursor-quad:nth-child(1) {
+  background-color: red;
+}
+
+.cursor-quad:nth-child(2) {
+  background-color: blue;
+  translate: 20px -20px;
+}
+
+.cursor-quad:nth-child(3) {
+  background-color: green;
+  translate: 0 -20px;
+}
+
+.cursor-quad:nth-child(4) {
+  background-color: violet;
+  translate: 20px -40px;
+}
