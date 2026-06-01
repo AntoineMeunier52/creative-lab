@@ -1,7 +1,29 @@
-import { EventEmitter, globalTicker, lerp, distance, getMousePos } from "@lib";
+import {
+  CustomPane,
+  EventEmitter,
+  globalTicker,
+  lerp,
+  distance,
+  getMousePos,
+} from "@lib";
 
 let mousepos = { x: 0, y: 0 };
 window.addEventListener("mousemove", (ev) => (mousepos = getMousePos(ev)));
+
+const PARAMS = {
+  distanceToTrigger: 0.7,
+  amt: 0.05,
+  shadowAmt: 0.01,
+  dist: 0.3,
+  distShadow: 0.1,
+};
+
+const pane = new CustomPane({ title: "Magnetic Button" });
+pane.addBinding(PARAMS, "distanceToTrigger", { min: 0, max: 3, step: 0.1 });
+pane.addBinding(PARAMS, "amt", { min: 0, max: 0.5, step: 0.01 });
+pane.addBinding(PARAMS, "shadowAmt", { min: 0, max: 0.5, step: 0.01 });
+pane.addBinding(PARAMS, "dist", { min: 0, max: 1, step: 0.01 });
+pane.addBinding(PARAMS, "distShadow", { min: 0, max: 1, step: 0.01 });
 
 export default class MagneticButton extends EventEmitter<{
   enter: () => void;
@@ -46,7 +68,7 @@ export default class MagneticButton extends EventEmitter<{
 
   calculateSizePostion() {
     this.rect = this.DOM.el.getBoundingClientRect();
-    this.distanceToTrigger = this.rect.width * 0.7;
+    this.distanceToTrigger = this.rect.width * PARAMS.distanceToTrigger;
   }
 
   initEvents() {
@@ -58,6 +80,8 @@ export default class MagneticButton extends EventEmitter<{
     if (!this.rect) {
       return;
     }
+
+    const distanceToTrigger = this.rect.width * PARAMS.distanceToTrigger;
 
     const distanceMouseButton = distance(
       mousepos.x + window.scrollX,
@@ -71,30 +95,27 @@ export default class MagneticButton extends EventEmitter<{
     let xShadow = 0;
     let yShadow = 0;
 
-    if (distanceMouseButton < this.distanceToTrigger) {
+    //if (distanceMouseButton < this.distanceToTrigger) {
+    if (distanceMouseButton < distanceToTrigger) {
       if (!this.state.hover) {
         this.enter();
       }
-      x =
-        (mousepos.x + window.scrollX - (this.rect.left + this.rect.width / 2)) *
-        0.3;
-      y =
-        (mousepos.y + window.scrollY - (this.rect.top + this.rect.height / 2)) *
-        0.3;
-      xShadow =
-        (mousepos.x + window.scrollX - (this.rect.left + this.rect.width / 2)) *
-        0.1;
-      yShadow =
-        (mousepos.y + window.scrollY - (this.rect.top + this.rect.height / 2)) *
-        0.1;
+      const offsetX =
+        mousepos.x + window.scrollX - (this.rect.left + this.rect.width / 2);
+      const offsetY =
+        mousepos.y + window.scrollY - (this.rect.top + this.rect.height / 2);
+      x = offsetX * PARAMS.dist;
+      y = offsetY * PARAMS.dist;
+      xShadow = offsetX * PARAMS.distShadow;
+      yShadow = offsetY * PARAMS.distShadow;
     } else if (this.state.hover) {
       this.leave();
     }
 
     this.renderedStyles.tx.current = x;
     this.renderedStyles.ty.current = y;
-    this.renderedStylesShadow.tx.current = x;
-    this.renderedStylesShadow.ty.current = y;
+    this.renderedStylesShadow.tx.current = xShadow;
+    this.renderedStylesShadow.ty.current = yShadow;
 
     const keys = Object.keys(this.renderedStyles) as Array<
       keyof typeof this.renderedStyles
@@ -102,8 +123,8 @@ export default class MagneticButton extends EventEmitter<{
     for (const key of keys) {
       const s = this.renderedStyles[key];
       const sShadow = this.renderedStylesShadow[key];
-      const factor = 1 - Math.exp(-s.amt * dt * 0.1);
-      const factorShadow = 1 - Math.exp(-sShadow.amt * dt * 0.1);
+      const factor = 1 - Math.exp(-PARAMS.amt * dt * 0.1);
+      const factorShadow = 1 - Math.exp(-PARAMS.shadowAmt * dt * 0.1);
       s.previous = lerp(s.previous, s.current, factor);
       sShadow.previous = lerp(sShadow.previous, sShadow.current, factorShadow);
     }

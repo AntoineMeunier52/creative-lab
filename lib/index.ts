@@ -1,3 +1,4 @@
+export { default as CustomPane } from "./CustomPane";
 export { default as EventEmitter } from "./eventEmitter";
 export { default as globalTicker } from "./ticker";
 export { default as Tween } from "./tween";
