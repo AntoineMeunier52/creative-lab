@@ -1,5 +1,5 @@
 import { gsap } from "gsap";
-import { getMousePos } from "@lib";
+import { calcWinSize, getMousePos, lerp } from "@lib";
 
 let mousepos = { x: 0, y: 0 };
 window.addEventListener("mousemove", (ev) => (mousepos = getMousePos(ev)));
@@ -7,15 +7,50 @@ window.addEventListener("mousemove", (ev) => (mousepos = getMousePos(ev)));
 export default class QuadCursor {
   private cursor: HTMLElement;
   private quadsCursor: HTMLElement[];
+  private renderedMovement: {
+    tx: { previous: number; current: number; amt: number };
+    ty: { previous: number; current: number; amt: number };
+  };
+  private renderedQuads: {
+    tx: { previous: number; current: number; amt: number };
+    ty: { previous: number; current: number; amt: number };
+    opacity: { previous: number; current: number; amt: number };
+  }[];
+  private bound: DOMRect;
+  private onMouseMoveEv: () => void;
 
   constructor() {
     this.cursor = document.querySelector(".cursor-wrapper") as HTMLElement;
     this.quadsCursor = Array.from(
       document.querySelectorAll(".cursor-quad"),
     ) as HTMLElement[];
+    this.renderedMovement = {
+      tx: { previous: 0, current: 0, amt: 0.2 },
+      ty: { previous: 0, current: 0, amt: 0.2 },
+    };
+    this.renderedQuads = this.quadsCursor.map(() => ({
+      tx: { previous: 0, current: 0, amt: 0.1 },
+      ty: { previous: 0, current: 0, amt: 0.1 },
+      opacity: { previous: 1, current: 1, amt: 0.1 },
+    }));
+    this.bound = this.cursor.getBoundingClientRect();
 
     this.initialize();
-    gsap.ticker.add(() => this.render());
+    this.onMouseMoveEv = () => {
+      this.renderedMovement.tx.previous = this.renderedMovement.tx.current =
+        mousepos.x - this.bound.width / 2;
+      this.renderedMovement.ty.previous = this.renderedMovement.ty.current =
+        mousepos.y - this.bound.height / 2;
+      this.quadsCursor.forEach((quad, index) => {
+        const renderedQuad = this.renderedQuads[index];
+        if (renderedQuad) {
+          gsap.to(quad, { duration: 0.9, ease: "power3.out", opacity: 1 });
+        }
+      });
+      gsap.ticker.add(() => this.render());
+      window.removeEventListener("mousemove", this.onMouseMoveEv);
+    };
+    window.addEventListener("mousemove", this.onMouseMoveEv);
   }
 
   initialize() {
@@ -28,15 +63,26 @@ export default class QuadCursor {
   }
 
   render() {
-    this.cursor;
+    this.renderedMovement.tx.current = mousepos.x - this.bound.width / 2;
+    this.renderedMovement.ty.current = mousepos.y - this.bound.height / 2;
 
-    //here use lerp with damp to make the cursor movement smoother
-    //and not tween at every frame to avoid performance issues
-    //because that make a new tween at every frame and that can cause performance issues
-    gsap.to(this.cursor, {
-      x: mousepos.x,
-      y: mousepos.y,
-      ease: "power3.out",
+    const keys = Object.keys(this.renderedMovement) as Array<
+      keyof typeof this.renderedMovement
+    >;
+    keys.forEach((key) => {
+      this.renderedMovement[key].previous = lerp(
+        this.renderedMovement[key].previous,
+        this.renderedMovement[key].current,
+        this.renderedMovement[key].amt,
+      );
+    });
+
+    this.cursor.style.transform = `translate3d(${this.renderedMovement.tx.previous}px, ${this.renderedMovement.ty.previous}px, 0)`;
+    this.quadsCursor.forEach((quad, index) => {
+      const renderedQuad = this.renderedQuads[index];
+      if (renderedQuad) {
+        quad.style.opacity = renderedQuad.opacity.previous.toString();
+      }
     });
   }
 }
