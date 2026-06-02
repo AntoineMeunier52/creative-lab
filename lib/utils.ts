@@ -14,6 +14,17 @@ const lerp = (a: number, b: number, n: number) => (1 - n) * a + n * b;
 const dampingFactor = (amt: number, dt: number, timeScale = 0.1) =>
   1 - Math.exp(-amt * dt * timeScale);
 
+const lerpFactored = (
+  a: number,
+  b: number,
+  n: number,
+  dt: number,
+  timeScale = 0.1,
+) => {
+  const factor = dampingFactor(n, dt, timeScale);
+  return lerp(a, b, factor);
+};
+
 const getMousePos = (e: MouseEvent) => {
   return {
     x: e.clientX,
@@ -29,4 +40,13 @@ const calcWinSize = () => {
   return { width: window.innerWidth, height: window.innerHeight };
 };
 
-export { map, clamp, lerp, dampingFactor, getMousePos, distance, calcWinSize };
+export {
+  map,
+  clamp,
+  lerp,
+  lerpFactored,
+  dampingFactor,
+  getMousePos,
+  distance,
+  calcWinSize,
+};
