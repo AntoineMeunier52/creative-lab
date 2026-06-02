@@ -1,19 +1,35 @@
 import { gsap } from "gsap";
-import { CustomPane, getMousePos, lerp } from "@lib";
+import {
+  CustomPane,
+  getMousePos,
+  lerp,
+  distance,
+  clamp,
+  map,
+  dampingFactor,
+} from "@lib";
+import { createNoise2D } from "simplex-noise";
 
 let mousepos = { x: 0, y: 0 };
 window.addEventListener("mousemove", (ev) => (mousepos = getMousePos(ev)));
 
+const noise2D = createNoise2D();
+
 const PARAMS = {
   movement: {
-    amt: 0.2,
-    firstApparanceDuration: 0.9,
+    amt: 0.15, // suivi wrapper : 0.1-0.2 = smooth agréable
+    firstApparanceDuration: 0.9, // ok
   },
   quads: {
     amt: 0.1,
-    opacityAmt: 0.1,
+    opacityAmt: 0.08, // lissage opacité : assez bas pour adoucir le noise
     fadeInDuration: 0.9,
   },
+  velocityMax: 2, // vélocité (en px/ms) au-delà de laquelle on plafonne
+  frequencyIdle: 0.0005, // respiration au repos : lente
+  frequencyMax: 0.02, // respiration en sprint : ~10x plus rapide
+  opacityMin: 0.4, // opacité basse de la respiration
+  opacityMax: 1, // opacité haute
 };
 
 const pane = new CustomPane({ title: "Quad Cursor" });
@@ -37,6 +53,16 @@ quadsFolder.addBinding(PARAMS.quads, "fadeInDuration", {
   max: 2,
   step: 0.05,
 });
+quadsFolder.addBinding(PARAMS, "opacityMin", { min: 0, max: 1, step: 0.05 });
+quadsFolder.addBinding(PARAMS, "opacityMax", { min: 0, max: 1, step: 0.05 });
+
+pane.addBinding(PARAMS, "velocityMax", { min: 0.1, max: 10, step: 0.1 });
+pane.addBinding(PARAMS, "frequencyIdle", {
+  min: 0.0001,
+  max: 0.1,
+  step: 0.0001,
+});
+pane.addBinding(PARAMS, "frequencyMax", { min: 0.01, max: 1, step: 0.01 });
 
 export default class QuadCursor {
   private cursor: HTMLElement;
@@ -50,8 +76,15 @@ export default class QuadCursor {
     ty: { previous: number; current: number; amt: number };
     opacity: { previous: number; current: number; amt: number };
   }[];
+  private renderedFrequency: {
+    previous: number;
+    current: number;
+    amt: number;
+  };
   private bound: DOMRect;
   private onMouseMoveEv: () => void;
+  private prevMousePos = { x: 0, y: 0 };
+  private phase = 0;
 
   constructor() {
     this.cursor = document.querySelector(".cursor-wrapper") as HTMLElement;
@@ -67,6 +100,7 @@ export default class QuadCursor {
       ty: { previous: 0, current: 0, amt: 0.1 },
       opacity: { previous: 1, current: 1, amt: 0.1 },
     }));
+    this.renderedFrequency = { previous: 0, current: 0, amt: 0.1 };
     this.bound = this.cursor.getBoundingClientRect();
 
     this.initialize();
@@ -85,7 +119,9 @@ export default class QuadCursor {
           });
         }
       });
-      gsap.ticker.add(() => this.render());
+      gsap.ticker.add((time, deltaTime, frame) =>
+        this.render(time, deltaTime, frame),
+      );
       window.removeEventListener("mousemove", this.onMouseMoveEv);
     };
     window.addEventListener("mousemove", this.onMouseMoveEv);
@@ -100,7 +136,8 @@ export default class QuadCursor {
     });
   }
 
-  render() {
+  // time: current time, deltaTime: time elapsed since last frame, frame: current frame count
+  render(time: number, deltaTime: number, frame: number) {
     this.renderedMovement.tx.current = mousepos.x - this.bound.width / 2;
     this.renderedMovement.ty.current = mousepos.y - this.bound.height / 2;
 
@@ -115,6 +152,56 @@ export default class QuadCursor {
       );
     });
 
+    // const quadsKeys = Object.keys(this.renderedQuads[0]) as Array<
+    //   keyof typeof this.renderedQuads[0]
+    // >;
+    //calc velocity and map it to a frequency for the noise
+    const rawVelocity =
+      distance(
+        mousepos.x,
+        mousepos.y,
+        this.prevMousePos.x,
+        this.prevMousePos.y,
+      ) / deltaTime;
+
+    //clamp velocity to avoid crazy values
+    const clampedVelocity = clamp(rawVelocity, 0, PARAMS.velocityMax);
+
+    //map velocity to a frequency for the noise
+    const targetFrequency = lerp(
+      this.renderedFrequency.previous,
+      map(
+        clampedVelocity,
+        0,
+        PARAMS.velocityMax,
+        PARAMS.frequencyIdle,
+        PARAMS.frequencyMax,
+      ),
+      this.renderedFrequency.amt,
+    );
+
+    this.renderedFrequency.previous = targetFrequency;
+
+    this.phase += deltaTime * targetFrequency;
+
+    this.renderedQuads.forEach((renderedQuad, index) => {
+      const offset = index * 100;
+      const noiseValue = noise2D(this.phase + offset, 0); //return noise between -1 and 1
+      renderedQuad.opacity.current = map(
+        noiseValue,
+        -1,
+        1,
+        PARAMS.opacityMin,
+        PARAMS.opacityMax,
+      );
+
+      renderedQuad.opacity.previous = lerp(
+        renderedQuad.opacity.previous,
+        renderedQuad.opacity.current,
+        PARAMS.quads.opacityAmt,
+      ); //interpolate opacity for smooth transition
+    });
+
     this.cursor.style.transform = `translate3d(${this.renderedMovement.tx.previous}px, ${this.renderedMovement.ty.previous}px, 0)`;
     this.quadsCursor.forEach((quad, index) => {
       const renderedQuad = this.renderedQuads[index];
@@ -122,5 +209,7 @@ export default class QuadCursor {
         quad.style.opacity = renderedQuad.opacity.previous.toString();
       }
     });
+
+    this.prevMousePos = { ...mousepos };
   }
 }
