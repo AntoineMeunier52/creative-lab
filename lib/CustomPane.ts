@@ -1,5 +1,10 @@
-import { Pane } from "tweakpane";
-import type { Bindable, BindingApi, BindingParams } from "@tweakpane/core";
+import { Pane, FolderApi } from "tweakpane";
+import type {
+  Bindable,
+  BindingApi,
+  BindingParams,
+  FolderParams,
+} from "@tweakpane/core";
 
 type Bound = { target: Record<string, unknown>; key: string };
 type Disposable = { dispose(): void };
@@ -31,6 +36,31 @@ class CustomPane extends Pane {
     });
     this.renderActions();
     return api;
+  }
+
+  /**
+   * Crée un folder dont les bindings sont aussi trackés pour Copy/Paste JSON.
+   * On garde les boutons d'action toujours en bas du pane racine.
+   */
+  override addFolder(params: FolderParams): FolderApi {
+    const folder = super.addFolder(params);
+    const originalAddBinding = folder.addBinding.bind(folder);
+
+    folder.addBinding = (<O extends Bindable, Key extends keyof O>(
+      object: O,
+      key: Key,
+      opt_params?: BindingParams,
+    ): BindingApi<unknown, O[Key]> => {
+      const api = originalAddBinding(object, key, opt_params);
+      this.tracked.push({
+        target: object as Record<string, unknown>,
+        key: String(key),
+      });
+      return api;
+    }) as typeof folder.addBinding;
+
+    this.renderActions();
+    return folder;
   }
 
   private renderActions() {

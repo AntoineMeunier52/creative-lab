@@ -1,8 +1,42 @@
 import { gsap } from "gsap";
-import { calcWinSize, getMousePos, lerp } from "@lib";
+import { CustomPane, getMousePos, lerp } from "@lib";
 
 let mousepos = { x: 0, y: 0 };
 window.addEventListener("mousemove", (ev) => (mousepos = getMousePos(ev)));
+
+const PARAMS = {
+  movement: {
+    amt: 0.2,
+    firstApparanceDuration: 0.9,
+  },
+  quads: {
+    amt: 0.1,
+    opacityAmt: 0.1,
+    fadeInDuration: 0.9,
+  },
+};
+
+const pane = new CustomPane({ title: "Quad Cursor" });
+
+const movementFolder = pane.addFolder({ title: "Wrapper Movement" });
+movementFolder.addBinding(PARAMS.movement, "amt", {
+  min: 0,
+  max: 1,
+  step: 0.01,
+});
+
+const quadsFolder = pane.addFolder({ title: "Quads" });
+quadsFolder.addBinding(PARAMS.quads, "amt", { min: 0, max: 1, step: 0.01 });
+quadsFolder.addBinding(PARAMS.quads, "opacityAmt", {
+  min: 0,
+  max: 1,
+  step: 0.01,
+});
+quadsFolder.addBinding(PARAMS.quads, "fadeInDuration", {
+  min: 0,
+  max: 2,
+  step: 0.05,
+});
 
 export default class QuadCursor {
   private cursor: HTMLElement;
@@ -44,7 +78,11 @@ export default class QuadCursor {
       this.quadsCursor.forEach((quad, index) => {
         const renderedQuad = this.renderedQuads[index];
         if (renderedQuad) {
-          gsap.to(quad, { duration: 0.9, ease: "power3.out", opacity: 1 });
+          gsap.to(quad, {
+            duration: PARAMS.movement.firstApparanceDuration,
+            ease: "power3.out",
+            opacity: 1,
+          });
         }
       });
       gsap.ticker.add(() => this.render());
@@ -73,7 +111,7 @@ export default class QuadCursor {
       this.renderedMovement[key].previous = lerp(
         this.renderedMovement[key].previous,
         this.renderedMovement[key].current,
-        this.renderedMovement[key].amt,
+        PARAMS.movement.amt,
       );
     });
 
