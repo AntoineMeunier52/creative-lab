@@ -2,6 +2,9 @@
 const map = (x: number, a: number, b: number, c: number, d: number) =>
   ((x - a) * (d - c)) / (b - a) + c;
 
+const clamp = (x: number, min: number, max: number) =>
+  Math.min(Math.max(x, min), max);
+
 const lerp = (a: number, b: number, n: number) => (1 - n) * a + n * b;
 
 // amt = catch-up speed, dt = delta time between frames (ms), timeScale = time scale factor (default 0.1)
@@ -26,4 +29,4 @@ const calcWinSize = () => {
   return { width: window.innerWidth, height: window.innerHeight };
 };
 
-export { map, lerp, getMousePos, distance, calcWinSize };
+export { map, clamp, lerp, dampingFactor, getMousePos, distance, calcWinSize };
