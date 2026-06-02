@@ -148,7 +148,7 @@ export default class QuadCursor {
       this.renderedMovement[key].previous = lerp(
         this.renderedMovement[key].previous,
         this.renderedMovement[key].current,
-        PARAMS.movement.amt,
+        dampingFactor(PARAMS.movement.amt, deltaTime),
       );
     });
 
@@ -167,22 +167,21 @@ export default class QuadCursor {
     //clamp velocity to avoid crazy values
     const clampedVelocity = clamp(rawVelocity, 0, PARAMS.velocityMax);
 
-    //map velocity to a frequency for the noise
-    const targetFrequency = lerp(
-      this.renderedFrequency.previous,
-      map(
-        clampedVelocity,
-        0,
-        PARAMS.velocityMax,
-        PARAMS.frequencyIdle,
-        PARAMS.frequencyMax,
-      ),
-      this.renderedFrequency.amt,
+    this.renderedFrequency.current = map(
+      clampedVelocity,
+      0,
+      PARAMS.velocityMax,
+      PARAMS.frequencyIdle,
+      PARAMS.frequencyMax,
     );
 
-    this.renderedFrequency.previous = targetFrequency;
+    this.renderedFrequency.previous = lerp(
+      this.renderedFrequency.previous,
+      this.renderedFrequency.current,
+      dampingFactor(this.renderedFrequency.amt, deltaTime),
+    );
 
-    this.phase += deltaTime * targetFrequency;
+    this.phase += deltaTime * this.renderedFrequency.previous;
 
     this.renderedQuads.forEach((renderedQuad, index) => {
       const offset = index * 100;
@@ -198,7 +197,7 @@ export default class QuadCursor {
       renderedQuad.opacity.previous = lerp(
         renderedQuad.opacity.previous,
         renderedQuad.opacity.current,
-        PARAMS.quads.opacityAmt,
+        dampingFactor(PARAMS.quads.opacityAmt, deltaTime),
       ); //interpolate opacity for smooth transition
     });
 
