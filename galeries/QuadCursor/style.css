@@ -1,7 +1,13 @@
+/* ---------- Page ---------- */
 body {
   cursor: none;
+  margin: 0;
+  min-height: 100vh;
+  /* fond sombre pour faire ressortir le curseur — change si besoin */
+  background: radial-gradient(circle at 50% 40%, #1a1a2e 0%, #0d0d14 100%);
 }
 
+/* ---------- Cursor wrapper ---------- */
 .cursor-wrapper {
   position: fixed;
   top: 0;
@@ -10,30 +16,45 @@ body {
   pointer-events: none;
 }
 
+/* ---------- Quads ---------- */
 .cursor-quad {
   position: absolute;
   top: 0;
   left: 0;
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   opacity: 0;
+
+  /* coins arrondis — ajuste de 4px (doux) à 9px (cercle parfait sur 18px) */
+  border-radius: 6px;
+
+  /* le glow : une lueur colorée autour de chaque quad */
+  /* (le box-shadow reprend la couleur du quad, voir plus bas) */
+  will-change: transform, opacity;
+
+  /* transition douce du border-radius/scale si tu animes au hover plus tard */
+  transition: border-radius 0.3s ease;
 }
 
+/* ---------- Palette harmonieuse (dégradé + glow par quad) ---------- */
+/* Palette "sunset/néon" cohérente plutôt que rouge/bleu/vert/violet criards */
+
 .cursor-quad:nth-child(1) {
-  background-color: red;
+  background: linear-gradient(135deg, #ff6b9d, #ff8e72);
+  box-shadow: 0 0 12px 2px rgba(255, 107, 157, 0.5);
 }
 
 .cursor-quad:nth-child(2) {
-  background-color: blue;
-  translate: 20px -20px;
+  background: linear-gradient(135deg, #ff8e72, #ffd166);
+  box-shadow: 0 0 12px 2px rgba(255, 142, 114, 0.5);
 }
 
 .cursor-quad:nth-child(3) {
-  background-color: green;
-  translate: 0 -20px;
+  background: linear-gradient(135deg, #6bc5ff, #9d6bff);
+  box-shadow: 0 0 12px 2px rgba(107, 197, 255, 0.5);
 }
 
 .cursor-quad:nth-child(4) {
-  background-color: violet;
-  translate: 20px -40px;
+  background: linear-gradient(135deg, #9d6bff, #ff6b9d);
+  box-shadow: 0 0 12px 2px rgba(157, 107, 255, 0.5);
 }
