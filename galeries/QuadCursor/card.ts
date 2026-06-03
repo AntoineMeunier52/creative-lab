@@ -15,7 +15,8 @@ let windowSize = calcWinSize();
 window.addEventListener("resize", () => (windowSize = calcWinSize()));
 
 export class Card extends EventEmitter<{
-  "quad-click": { x: number; y: number }[];
+  enter: { x: number; y: number }[];
+  leave: void;
 }> {
   private el: HTMLElement;
   private state: "idle" | "hovered" | "clicked" = "idle";
@@ -36,11 +37,13 @@ export class Card extends EventEmitter<{
 
   calcCornersPos() {
     const { left, top, width, height } = this.rect;
+    const scrollY = window.scrollY || window.pageYOffset;
+    const scrollX = window.scrollX || window.pageXOffset;
     return [
-      { x: left, y: top },
-      { x: left + width, y: top },
-      { x: left, y: top + height },
-      { x: left + width, y: top + height },
+      { x: left + scrollX, y: top + scrollY },
+      { x: left + width + scrollX, y: top + scrollY },
+      { x: left + scrollX, y: top + height + scrollY },
+      { x: left + width + scrollX, y: top + height + scrollY },
     ];
   }
 }
