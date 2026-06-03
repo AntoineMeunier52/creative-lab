@@ -9,7 +9,7 @@ import {
 } from "@lib";
 
 let mousePos = { x: 0, y: 0 };
-document.addEventListener("mousemove", (e) => (mousePos = getMousePos(e)));
+window.addEventListener("mousemove", (e) => (mousePos = getMousePos(e)));
 
 let windowSize = calcWinSize();
 window.addEventListener("resize", () => (windowSize = calcWinSize()));
@@ -29,21 +29,22 @@ export class Card extends EventEmitter<{
     this.rect = this.el.getBoundingClientRect();
     this.corners = this.calcCornersPos();
 
-    window.addEventListener("resize", () => {
-      this.rect = this.el.getBoundingClientRect();
-      this.corners = this.calcCornersPos();
-    });
+    window.addEventListener("resize", this.updateCorners);
+    window.addEventListener("scroll", this.updateCorners, { passive: true });
   }
+
+  private updateCorners = () => {
+    this.rect = this.el.getBoundingClientRect();
+    this.corners = this.calcCornersPos();
+  };
 
   calcCornersPos() {
     const { left, top, width, height } = this.rect;
-    const scrollY = window.scrollY || window.pageYOffset;
-    const scrollX = window.scrollX || window.pageXOffset;
     return [
-      { x: left + scrollX, y: top + scrollY },
-      { x: left + width + scrollX, y: top + scrollY },
-      { x: left + scrollX, y: top + height + scrollY },
-      { x: left + width + scrollX, y: top + height + scrollY },
+      { x: left, y: top },
+      { x: left + width, y: top },
+      { x: left, y: top + height },
+      { x: left + width, y: top + height },
     ];
   }
 }

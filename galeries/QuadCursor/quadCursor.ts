@@ -7,11 +7,15 @@ import {
   clamp,
   map,
   dampingFactor,
+  calcWinSize,
 } from "@lib";
 import { createNoise2D } from "simplex-noise";
 
+// coordonnées viewport : le wrapper est en position:fixed, donc pas d'offset de scroll
 let mousepos = { x: 0, y: 0 };
-window.addEventListener("mousemove", (ev) => (mousepos = getMousePos(ev)));
+window.addEventListener("mousemove", (ev) => {
+  mousepos = getMousePos(ev);
+});
 
 const noise2D = createNoise2D();
 
