@@ -7,6 +7,27 @@ body {
   background: radial-gradient(circle at 50% 40%, #1a1a2e 0%, #0d0d14 100%);
 }
 
+main {
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.main-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  color: white;
+  font: 900;
+  font-size: 2rem;
+  font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+  border: 2px solid white;
+  width: 10rem;
+  height: 4rem;
+}
+
 /* ---------- Cursor wrapper ---------- */
 .cursor-wrapper {
   position: fixed;
@@ -21,8 +42,8 @@ body {
   position: absolute;
   top: 0;
   left: 0;
-  width: 18px;
-  height: 18px;
+  width: 12px;
+  height: 12px;
   opacity: 0;
 
   /* coins arrondis — ajuste de 4px (doux) à 9px (cercle parfait sur 18px) */

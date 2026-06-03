@@ -130,8 +130,8 @@ export default class QuadCursor {
   initialize() {
     this.quadsCursor.forEach((quad, index) => {
       gsap.set(quad, {
-        x: Math.floor(index / 2) * 20,
-        y: (index % 2) * 20,
+        x: Math.floor(index / 2) * 18,
+        y: (index % 2) * 18,
       });
     });
   }
