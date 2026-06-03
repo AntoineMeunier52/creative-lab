@@ -17,11 +17,18 @@ window.addEventListener("resize", () => (windowSize = calcWinSize()));
 export class Card extends EventEmitter<{
   enter: { x: number; y: number }[];
   leave: void;
+  click: void;
 }> {
   private el: HTMLElement;
-  private state: "idle" | "hovered" | "clicked" = "idle";
   private corners: { x: number; y: number }[] = [];
   private rect: DOMRect;
+
+  private state: "idle" | "hovered" | "clicked" = "idle";
+  private transitions: Record<string, string[]> = {
+    idle: ["hovered"], //quads go in corners on hover
+    hovered: ["idle", "clicked"], //quads go back to center on leave, and spin the quads wrapper on click
+    clicked: ["hovered"], //quads stop spinning on click release, and stay in corners if mouse is still hovered, or go back to center if not
+  };
 
   constructor(el: HTMLElement) {
     super();
@@ -46,5 +53,35 @@ export class Card extends EventEmitter<{
       { x: left, y: top + height },
       { x: left + width, y: top + height },
     ];
+  }
+
+  setState(next: "idle" | "hovered" | "clicked") {
+    if (!this.transitions[this.state]?.includes(next)) return;
+    if (this.state === next) return;
+
+    this.onExit(this.state);
+
+    this.state = next;
+
+    this.onEnter(next);
+  }
+
+  private onEnter(state: "idle" | "hovered" | "clicked") {
+    switch (state) {
+      case "hovered":
+        this.emit("enter", this.corners);
+        break;
+      case "idle":
+        this.emit("leave", undefined);
+        break;
+      case "clicked":
+        this.emit("click", undefined);
+        break;
+    }
+  }
+
+  private onExit(state: "idle" | "hovered" | "clicked") {
+    //nothing for the moment,
+    //clean here tween, aditional classes, listeners...
   }
 }
