@@ -152,9 +152,6 @@ export default class QuadCursor {
       );
     });
 
-    // const quadsKeys = Object.keys(this.renderedQuads[0]) as Array<
-    //   keyof typeof this.renderedQuads[0]
-    // >;
     //calc velocity and map it to a frequency for the noise
     const rawVelocity =
       distance(

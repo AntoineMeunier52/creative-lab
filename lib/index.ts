@@ -7,6 +7,7 @@ export {
   map,
   clamp,
   lerp,
+  lerpFactored,
   dampingFactor,
   getMousePos,
   calcWinSize,
