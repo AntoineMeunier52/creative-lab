@@ -104,7 +104,7 @@ export class Card extends EventEmitter<{
       this.rect.top + this.rect.height / 2,
     );
 
-    if (inside && this.state === "idle") {
+    if (inside) {
       this.setState("hovered");
     } else {
       this.setState("idle");
