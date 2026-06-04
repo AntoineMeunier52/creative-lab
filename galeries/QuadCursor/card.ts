@@ -15,7 +15,7 @@ window.addEventListener("mousemove", (e) => (mousePos = getMousePos(e)));
 let windowSize = calcWinSize();
 window.addEventListener("resize", () => (windowSize = calcWinSize()));
 
-export class Card extends EventEmitter<{
+export default class Card extends EventEmitter<{
   enter: { x: number; y: number }[];
   leave: void;
   click: void;
@@ -97,12 +97,12 @@ export class Card extends EventEmitter<{
       mousePos.y > this.rect.top - triggerDistance &&
       mousePos.y < this.rect.bottom + triggerDistance;
 
-    const distanceMouseCard = distance(
-      mousePos.x,
-      mousePos.y,
-      this.rect.left + this.rect.width / 2,
-      this.rect.top + this.rect.height / 2,
-    );
+    // const distanceMouseCard = distance(
+    //   mousePos.x,
+    //   mousePos.y,
+    //   this.rect.left + this.rect.width / 2,
+    //   this.rect.top + this.rect.height / 2,
+    // );
 
     if (inside) {
       this.setState("hovered");
