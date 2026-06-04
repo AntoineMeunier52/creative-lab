@@ -1,3 +1,4 @@
+import { gsap } from "gsap";
 import { EventEmitter } from "@lib";
 import {
   getMousePos,
@@ -38,6 +39,8 @@ export class Card extends EventEmitter<{
 
     window.addEventListener("resize", this.updateCorners);
     window.addEventListener("scroll", this.updateCorners, { passive: true });
+
+    gsap.ticker.add(() => this.render());
   }
 
   private updateCorners = () => {
@@ -83,5 +86,28 @@ export class Card extends EventEmitter<{
   private onExit(state: "idle" | "hovered" | "clicked") {
     //nothing for the moment,
     //clean here tween, aditional classes, listeners...
+  }
+
+  render() {
+    //check if mouse is inside the card rect
+    const triggerDistance = 20; //20px outside the card rect
+    const inside =
+      mousePos.x > this.rect.left - triggerDistance &&
+      mousePos.x < this.rect.right + triggerDistance &&
+      mousePos.y > this.rect.top - triggerDistance &&
+      mousePos.y < this.rect.bottom + triggerDistance;
+
+    const distanceMouseCard = distance(
+      mousePos.x,
+      mousePos.y,
+      this.rect.left + this.rect.width / 2,
+      this.rect.top + this.rect.height / 2,
+    );
+
+    if (inside && this.state === "idle") {
+      this.setState("hovered");
+    } else {
+      this.setState("idle");
+    }
   }
 }
