@@ -2,16 +2,16 @@ import QuadCursor from "./quadCursor";
 import Card from "./card";
 
 window.addEventListener("DOMContentLoaded", () => {
-  new QuadCursor();
+  const cursor = new QuadCursor();
 
   const card = new Card(document.querySelector("#card") as HTMLElement);
 
-  card.on("enter", (corners) => {
-    console.log("enter", corners);
+  card.on("attract", ({ corners, strength }) => {
+    cursor.toCorners(corners, strength);
   });
 
   card.on("leave", () => {
-    console.log("leave");
+    cursor.toIdle();
   });
 
   card.on("click", () => {

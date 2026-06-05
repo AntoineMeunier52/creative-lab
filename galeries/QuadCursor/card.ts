@@ -1,28 +1,23 @@
 import { gsap } from "gsap";
 import { EventEmitter } from "@lib";
-import {
-  getMousePos,
-  distance,
-  calcWinSize,
-  lerpFactored,
-  map,
-  clamp,
-} from "@lib";
+import { getMousePos, map, clamp } from "@lib";
 
 let mousePos = { x: 0, y: 0 };
 window.addEventListener("mousemove", (e) => (mousePos = getMousePos(e)));
 
-let windowSize = calcWinSize();
-window.addEventListener("resize", () => (windowSize = calcWinSize()));
-
 export default class Card extends EventEmitter<{
-  enter: { x: number; y: number }[];
+  attract: { corners: { x: number; y: number }[]; strength: number };
   leave: void;
   click: void;
 }> {
   private el: HTMLElement;
   private corners: { x: number; y: number }[] = [];
   private rect: DOMRect;
+  private attracting = false;
+
+  // réglages des zones
+  private nearRadius = 140; // bande de légère attirance autour de la card
+  private maxNearPull = 0.28; // intensité max de l'attirance en approche
 
   private state: "idle" | "hovered" | "clicked" = "idle";
   private transitions: Record<string, string[]> = {
@@ -71,43 +66,48 @@ export default class Card extends EventEmitter<{
 
   private onEnter(state: "idle" | "hovered" | "clicked") {
     switch (state) {
-      case "hovered":
-        this.emit("enter", this.corners);
-        break;
-      case "idle":
-        this.emit("leave", undefined);
-        break;
       case "clicked":
         this.emit("click", undefined);
         break;
     }
   }
 
-  private onExit(state: "idle" | "hovered" | "clicked") {
+  private onExit(_state: "idle" | "hovered" | "clicked") {
     //nothing for the moment,
     //clean here tween, aditional classes, listeners...
   }
 
   render() {
-    //check if mouse is inside the card rect
-    const triggerDistance = 20; //20px outside the card rect
-    const inside =
-      mousePos.x > this.rect.left - triggerDistance &&
-      mousePos.x < this.rect.right + triggerDistance &&
-      mousePos.y > this.rect.top - triggerDistance &&
-      mousePos.y < this.rect.bottom + triggerDistance;
+    const { left, top, right, bottom } = this.rect;
+    const mx = mousePos.x;
+    const my = mousePos.y;
 
-    // const distanceMouseCard = distance(
-    //   mousePos.x,
-    //   mousePos.y,
-    //   this.rect.left + this.rect.width / 2,
-    //   this.rect.top + this.rect.height / 2,
-    // );
+    const dx = Math.max(left - mx, 0, mx - right);
+    const dy = Math.max(top - my, 0, my - bottom);
+    const distToRect = Math.hypot(dx, dy);
 
+    const inside = distToRect <= 0;
+
+    this.setState(inside ? "hovered" : "idle");
+
+    // strength continu : 1 dedans, faible dans la bande de proximité, 0 au-delà
+    let strength = 0;
     if (inside) {
-      this.setState("hovered");
-    } else {
-      this.setState("idle");
+      strength = 1;
+    } else if (distToRect < this.nearRadius) {
+      strength = clamp(
+        map(distToRect, this.nearRadius, 0, 0, this.maxNearPull),
+        0,
+        this.maxNearPull,
+      );
+    }
+
+    if (strength > 0) {
+      this.emit("attract", { corners: this.corners, strength });
+      this.attracting = true;
+    } else if (this.attracting) {
+      this.emit("leave", undefined);
+      this.attracting = false;
     }
   }
 }
